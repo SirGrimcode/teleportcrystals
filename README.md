@@ -288,3 +288,11 @@ not a sound-registry one - `net.minecraft.sounds` is for `SoundEvents`
 like the ones `TeleportCrystalItem` plays, a different class entirely).
 `AMETHYST_CLUSTER` is confirmed as a real constant there, so no other
 change was needed once the import was fixed.
+
+## Round 11: soundType() -> sound()
+
+One more naming issue in the same line - checked against Mojang's
+mapping history across every version listed (1.16.5 through the current
+one): the method has always been called `sound(SoundType)`, never
+`soundType(...)`. `soundType` is the *field* name, not the setter -
+easy mix-up, now fixed.

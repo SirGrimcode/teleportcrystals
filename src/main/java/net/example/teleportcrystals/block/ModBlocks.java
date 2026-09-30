@@ -24,7 +24,7 @@ public final class ModBlocks {
     public static final Block SPACIAL_ORE = register("spacial_ore",
             properties -> new Block(properties
                     .mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_BLUE)
-                    .soundType(SoundType.AMETHYST_CLUSTER)
+                    .sound(SoundType.AMETHYST_CLUSTER)
                     .requiresCorrectToolForDrops()
                     .strength(3.5F, 6.0F)));
 
