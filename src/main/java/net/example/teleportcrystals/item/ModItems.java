@@ -26,6 +26,12 @@ public final class ModItems {
     public static final Item TELEPORT_CRYSTAL = register("teleport_crystal",
             properties -> new TeleportWandItem(properties.stacksTo(1).durability(24)));
 
+    // Dropped by mining teleportcrystals:spacial_ore (see ModBlocks and
+    // the spacial_ore loot table); replaces amethyst shards in the
+    // Netherite (teleport_crystal) recipe.
+    public static final Item SPACIAL_SHARD = register("spacial_shard",
+            properties -> new Item(properties.stacksTo(64)));
+
     // An item's Properties must have its own registry id set via .setId(...)
     // *before* the item is constructed - the item's constructor reads it
     // immediately (for its description id) and throws a NullPointerException
@@ -44,6 +50,9 @@ public final class ModItems {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
             output.accept(TELEPORT_STONE);
             output.accept(TELEPORT_CRYSTAL);
+        });
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+            output.accept(SPACIAL_SHARD);
         });
     }
 }

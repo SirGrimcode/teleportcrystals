@@ -1,4 +1,6 @@
 {
   "item.teleportcrystals.teleport_stone": "Teleport Stone",
-  "item.teleportcrystals.teleport_crystal": "Teleport Crystal"
+  "item.teleportcrystals.teleport_crystal": "Teleport Crystal",
+  "block.teleportcrystals.spacial_ore": "Spacial Ore",
+  "item.teleportcrystals.spacial_shard": "Spacial Shard"
 }

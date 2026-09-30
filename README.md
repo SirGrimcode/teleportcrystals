@@ -234,3 +234,47 @@ easy mix-up. Updated `build.yml` to only upload the real, compiled jar
 going forward (excludes `*-sources.jar`) so this can't happen again from
 a future Actions build. Make sure the *current* mods folder has
 `teleportcrystals-1.0.0.jar`, not the `-sources` one.
+
+## Round 9: Spacial Ore + Spacial Shard
+
+New content:
+
+- **`teleportcrystals:spacial_ore`** block - generates in the End, only
+  in the three "outer island" biomes (`end_highlands`, `end_midlands`,
+  `end_barrens`) - deliberately excluding the central main island
+  (`the_end`) and `small_end_islands` (the scattered specks out in the
+  void), per your "no random bits out in the void" ask. Wired up via
+  Fabric's `BiomeModifications` API (`fabric-biome-api-v1`, already
+  pulled in by `fabric-api`) rather than overriding the vanilla biome
+  JSON files directly.
+- **`teleportcrystals:spacial_shard`** item - drops from mining the ore.
+  Now replaces the amethyst shard in the Netherite `teleport_crystal`
+  recipe (the cheaper `teleport_stone` recipe still uses amethyst shard -
+  only the Netherite one changed, as asked).
+- Requires a diamond pickaxe or better (`#minecraft:needs_diamond_tool`,
+  same tag ancient debris and obsidian use) and only drops shards with
+  the right tool.
+- Silk Touch drops the ore block itself; otherwise it drops shards, with
+  Fortune scaling identically to diamond ore (`minecraft:apply_bonus` /
+  `minecraft:ore_drops` formula - loot table verified against the exact
+  format vanilla ore loot tables use in this version line).
+
+**Two things I couldn't verify by testing, since I can't run the game:**
+
+1. **Vein size.** Data-driven ore features take one `size` number (set to
+   4) that approximates a blob shape - there's no min/max range knob for
+   "3 to 5 ore" specifically. Real generated veins will vary somewhat
+   around that.
+2. **Rarity and height range.** Set to a `rarity_filter` chance of 10
+   (roughly 1-in-10 chunks in those biomes even attempts a spawn) across
+   Y -20 to 100, as a first guess at "between diamond and ancient
+   debris." Both are single numbers in
+   `data/teleportcrystals/worldgen/placed_feature/spacial_ore.json` you
+   can tune directly after playtesting - lower the `chance` number for
+   more common, raise it for rarer.
+
+**About the ore texture:** `spacialore.jpg` was a JPEG - Minecraft only
+reads PNG for textures, so I converted it (no visual change, just
+re-encoded) to `textures/block/spacial_ore.png`. You don't need to
+change anything in your own files; just know that if you replace this
+texture yourself later, save it as a `.png`, not `.jpg`.

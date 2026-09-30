@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "size": 4,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:end_stone"
+        },
+        "state": { "Name": "teleportcrystals:spacial_ore" }
+      }
+    ]
+  }
+}

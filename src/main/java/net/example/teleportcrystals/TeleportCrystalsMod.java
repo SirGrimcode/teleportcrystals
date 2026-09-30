@@ -1,6 +1,8 @@
 package net.example.teleportcrystals;
 
+import net.example.teleportcrystals.block.ModBlocks;
 import net.example.teleportcrystals.item.ModItems;
+import net.example.teleportcrystals.worldgen.ModWorldGen;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,8 @@ public class TeleportCrystalsMod implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.init();
+        ModBlocks.init();
+        ModWorldGen.init();
         LOGGER.info("Teleport Crystals initialized");
     }
 }
