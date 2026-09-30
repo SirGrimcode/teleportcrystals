@@ -1,0 +1,45 @@
+plugins {
+    // Pinned to the Loom version Fabric recommends for 26.3 (fabricmc.net/2026/09/15/263.html).
+    // Don't use '1.+' and don't add a useModule() workaround in settings.gradle:
+    // that makes Gradle treat Loom as a plain library and fails with
+    // "No matching variant of net.fabricmc:fabric-loom ...".
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    // Add extra repositories here if you pull in other mods' APIs.
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // No "mappings(...)" line and no "modImplementation" - Minecraft is
+    // unobfuscated as of 26.1, so there's nothing to remap.
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}

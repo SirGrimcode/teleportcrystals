@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BAB",
+    "NAN",
+    "ENE"
+  ],
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:blaze_rod",
+    "N": "minecraft:netherite_ingot",
+    "E": "minecraft:ender_pearl"
+  },
+  "result": {
+    "id": "teleportcrystals:teleport_crystal",
+    "count": 1
+  }
+}

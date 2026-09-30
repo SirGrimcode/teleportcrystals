@@ -1,0 +1,43 @@
+name: Build mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      # This project doesn't ship a Gradle wrapper, so this step provisions
+      # Gradle itself directly on the runner.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.6.0
+
+      - name: Build
+        run: gradle build --stacktrace
+
+      - name: Upload built jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: teleportcrystals
+          # Loom's withSourcesJar() (see build.gradle) also produces a
+          # *-sources.jar - raw .java text + unprocessed resources, no
+          # compiled classes at all. It's harmless to have around but has
+          # caused a real "ClassNotFoundException" crash from being put in
+          # a mods folder by mistake, so it's excluded from what gets
+          # uploaded here. Only the real, compiled jar goes in the mods
+          # folder.
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
