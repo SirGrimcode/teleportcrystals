@@ -278,3 +278,13 @@ reads PNG for textures, so I converted it (no visual change, just
 re-encoded) to `textures/block/spacial_ore.png`. You don't need to
 change anything in your own files; just know that if you replace this
 texture yourself later, save it as a `.png`, not `.jpg`.
+
+## Round 10: SoundType compile error
+
+`import net.minecraft.sounds.SoundType;` was wrong - checked against
+Mojang's own mapping history, `SoundType` lives at
+`net.minecraft.world.level.block.SoundType` (it's a block-state concept,
+not a sound-registry one - `net.minecraft.sounds` is for `SoundEvents`
+like the ones `TeleportCrystalItem` plays, a different class entirely).
+`AMETHYST_CLUSTER` is confirmed as a real constant there, so no other
+change was needed once the import was fixed.
