@@ -296,3 +296,37 @@ mapping history across every version listed (1.16.5 through the current
 one): the method has always been called `sound(SoundType)`, never
 `soundType(...)`. `soundType` is the *field* name, not the setter -
 easy mix-up, now fixed.
+
+## Round 12: two real 26.3 data-pack format changes
+
+Found Minecraft's own official 26.3 patch notes (published the day this
+version shipped) and they document exactly what changed - not guesswork:
+
+1. **`worldgen/configured_feature` was merged into `worldgen/feature`,
+   and the nested `"config"` object is gone - its fields (`size`,
+   `targets`, etc.) now sit directly at the top level next to `"type"`.**
+   Moved `data/teleportcrystals/worldgen/configured_feature/spacial_ore.json`
+   to `data/teleportcrystals/worldgen/feature/spacial_ore.json` and
+   flattened it. This was the actual cause of the "Unbound values ...
+   worldgen/feature: [teleportcrystals:spacial_ore]" error - the game
+   was looking in `worldgen/feature` for our feature and it wasn't there.
+   (`worldgen/placed_feature` is unaffected and still references
+   `"feature": "teleportcrystals:spacial_ore"` the same way.)
+2. **Block State fields were renamed: `Name` -> `id`, `Properties` ->
+   `properties`** - so the ore target's `"state": {"Name": ...}` had to
+   become `"state": {"id": ...}`. This is inside the same file as fix 1.
+3. **Loot table field renames**, which would have crashed the game the
+   moment the ore was actually mined, even though it hadn't triggered
+   yet: a loot entry's `conditions` (list) is now `condition` (a single
+   value), `functions` is now `modifier`, and inside each condition/
+   function object the type-discriminator key changed from `condition`/
+   `function` to just `type`. Rewrote `spacial_ore`'s loot table to
+   match. I have not been able to see this one actually succeed in-game
+   (nothing mines the ore in a log file), so if breaking the ore still
+   errors, send that log.
+
+Note: an earlier round in this README cited a third-party wiki entry
+labeled "Validated for Minecraft Java 26.2" for the loot table's
+`conditions`/`functions` format - that source was correct for 26.2, but
+26.3 changed it out from under it. Version-pinned references like that
+are only as good as the version they were checked against.
