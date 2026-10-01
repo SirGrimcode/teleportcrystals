@@ -330,3 +330,18 @@ labeled "Validated for Minecraft Java 26.2" for the loot table's
 `conditions`/`functions` format - that source was correct for 26.2, but
 26.3 changed it out from under it. Version-pinned references like that
 are only as good as the version they were checked against.
+
+## Round 13: missing required field in the new flattened format
+
+Progress: the file-move fix worked - the game found
+`teleportcrystals:spacial_ore` this time instead of calling it unbound.
+The new error was a parse failure: `No key discard_chance_on_air_exposure`.
+
+In 26.3's flattened ore feature format, `discard_chance_on_air_exposure`
+is apparently a required field with no default (previously, nested under
+`config`, it could be omitted). Added it set to `0.0` (never discard, so
+behavior matches what we had before this field existed). If you'd rather
+ore touching open air/void near an island's edge just not generate there,
+raise this toward `1.0` - that's a free knob to tune the "no random bits
+out in the void" feel further, on top of the biome restriction already
+doing the heavy lifting there.
