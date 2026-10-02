@@ -380,3 +380,27 @@ searching - especially right after loading in. If you dig around several
 outer-island chunks and still find none, say so and I'll help debug
 further (there may be a way to check loaded features via a debug
 command).
+
+## Round 15: temporary "make it obvious" testing settings
+
+Not a bug fix - cranking up visibility so we can confirm the feature
+actually generates at all, before tuning real rarity:
+
+- `placed_feature/spacial_ore.json`: swapped the `rarity_filter` (chance
+  10) for `count: 20` (20 placement attempts per chunk instead of a
+  1-in-10 chance of even one), and widened the height range to -60 to
+  250 - nearly the entire End height limit - in case your islands sit
+  outside the -20 to 100 band I'd originally guessed.
+- `worldgen/feature/spacial_ore.json`: vein `size` bumped 4 -> 9, purely
+  so a vein is unmistakable at a glance.
+
+**Important: this only affects newly-generated chunks.** Minecraft
+generates each chunk once and never regenerates it, so any End terrain
+you've already loaded/explored is permanently locked in without this
+ore, settings change or not. To test, either fly to End terrain you
+haven't loaded before (new outer-island chunks), or start a fresh world.
+Loading the same old chunks again won't show anything different.
+
+Once you confirm it's generating, tell me and I'll dial `size` and the
+placement back down to reasonable, rare numbers (this round's settings
+would be absurdly common for real play - that's the point, for now).
