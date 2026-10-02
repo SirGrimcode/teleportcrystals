@@ -345,3 +345,38 @@ ore touching open air/void near an island's edge just not generate there,
 raise this toward `1.0` - that's a free knob to tune the "no random bits
 out in the void" feel further, on top of the biome restriction already
 doing the heavy lifting there.
+
+## Round 14: missing item-definition files (the real texture bug)
+
+Found it by comparing against the working items: Minecraft's current
+item system needs an `assets/teleportcrystals/items/<id>.json` file for
+*every* item - that's what actually points an item at its model. The two
+teleport items have always had one (`items/teleport_stone.json`,
+`items/teleport_crystal.json`). `spacial_ore` and `spacial_shard` never
+got theirs when they were added in round 9 - I created the `models/`
+files but missed the `items/` ones that point to them. Added both now:
+
+```json
+{ "model": { "type": "minecraft:model", "model": "teleportcrystals:item/spacial_shard" } }
+```
+
+(and the equivalent for `spacial_ore`, pointing at
+`teleportcrystals:item/spacial_ore`). That's almost certainly the whole
+missing-texture bug - the texture files themselves were fine.
+
+Also re-saved both textures from your latest uploads. One thing worth
+knowing: the `spacial_ore.png` you sent was JPEG data saved with a
+`.png` extension (not a real re-encode, just a renamed file) - Minecraft
+checks actual file contents, not the extension, so that likely would
+have failed to load too. Converted it to a genuine PNG this time, same
+pixels. `spacial_shard.png` was already a real PNG and is unchanged
+pixel-for-pixel from before.
+
+**On not finding the ore in the End:** nothing in the log suggests a
+worldgen error this time (registries loaded clean). At a `rarity_filter`
+chance of 10, restricted to 3 biomes, and requiring digging into actual
+island terrain (not just walking the surface), it may simply take some
+searching - especially right after loading in. If you dig around several
+outer-island chunks and still find none, say so and I'll help debug
+further (there may be a way to check loaded features via a debug
+command).
