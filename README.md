@@ -659,3 +659,46 @@ it's exactly what every vanilla recipe unlock already uses, so in
 practice it does what you asked.
 
 Both advancement files fixed to use it.
+
+## Round 20: "mod not loading" log looked clean; new Nether Valt structure
+
+### On "the mod isn't loading"
+The `latest.log` you sent shows a completely clean run - mod initialized,
+datapack loaded, world booted, you played and disconnected normally.
+Nothing in it shows a failure. That log doesn't match the symptom you
+described, so I couldn't act on it yet - let me know whether that's the
+actual failing log or a different session, and what exactly Modrinth
+showed (mod list empty, or something else) so I can tell what's
+actually going wrong.
+
+### Valt: a 4-variant Nether structure
+Since you built four complete, non-jigsaw variants yourself (confirmed:
+all four are 14×13×12, same block/entity counts, no jigsaw blocks in
+any of them), this didn't need the jigsaw-chain machinery the Ruin Camp
+needed - just a weighted pick of one whole structure from four options,
+using a `size: 1` jigsaw structure (a well-established pattern for
+"single room, several variants, no further growth" structures - no
+attaching pieces, no "nothing" fallback needed since one variant always
+generates).
+
+Weights (`worldgen/template_pool/valt/start.json`): ender pearl 17,
+blaze rod 17, spacial shard 4, netherite 2 - sums to 40, giving exactly
+10% spacial shard, 5% netherite, and the remaining 85% split evenly
+between the other two (42.5% each, since you didn't specify a different
+split between them - let me know if you want those uneven too).
+
+Structure setup (`worldgen/structure/valt.json`,
+`worldgen/structure_set/valt.json`): restricted to `#minecraft:is_nether`
+(every Nether biome), `step: underground_structures` (matches how
+fortresses/bastions generate), no heightmap projection (the Nether
+doesn't have a clean "surface" the way the Overworld/End do), instead a
+random Y between 10 and 100 and `terrain_adaptation: none` (placed
+exactly as built, no terrain blending). **This height range and the
+spacing (20/8 chunks) are my best guess, not something I could verify or
+test** - the Nether's layered terrain (lava seas, ceilings, caves) makes
+"where it'll actually land" much less predictable than the other two
+structures, so this one in particular may need real playtesting and
+adjustment once you can see where it's landing.
+
+`/locate structure teleportcrystals:valt` will find it the same way the
+Ruin Camp does.

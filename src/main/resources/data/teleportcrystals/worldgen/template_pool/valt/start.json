@@ -1,0 +1,42 @@
+{
+  "name": "teleportcrystals:valt/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 17,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:valt_ender_pearl",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 17,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:valt_blaz_rod",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 4,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:valt_spacial_shard",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:valt_netherite",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}
