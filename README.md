@@ -620,3 +620,21 @@ The Ruin Camp should be fully wired up and consistent now, aside from
 whatever final layout/connectivity choices only testing in-game can
 confirm (I still can't run Minecraft myself - everything here is built
 and verified as data, not play-tested).
+
+## Round 18: missing required field, wall_2 confirmed clean
+
+### World-boot error
+`No key start_height in MapLike[...]` - `worldgen/structure/ruin_camp.json`
+was missing `start_height`, a required height-provider field (used
+alongside `project_start_to_heightmap` as an offset from the projected
+surface height). Added `"start_height": { "absolute": 0 }` - no extra
+offset beyond the surface heightmap projection already in place. Checked
+this one against a real field-by-field reference for jigsaw structure
+JSON rather than just patching the one missing key blind, to avoid
+finding a second missing field next round.
+
+### Wall 2 check
+Confirmed: `ruin_camp_wall_2.nbt` currently has `minecraft:iron_ingot` in
+its three filled frames and nothing else - already matches "wall 2 is
+the iron wall" exactly, no changes needed. (And yes, wall 2 = iron, wall
+3 = ender pearl, wall 1 = amethyst - that's exactly how they're set up.)
