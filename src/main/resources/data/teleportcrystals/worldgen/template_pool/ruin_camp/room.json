@@ -1,0 +1,28 @@
+{
+  "name": "teleportcrystals:ruin_camp/room",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:broken_room",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 30,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:ruin_camp_room",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 65,
+      "element": { "element_type": "minecraft:empty_pool_element" }
+    }
+  ]
+}

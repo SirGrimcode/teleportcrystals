@@ -1,14 +1,14 @@
 {
   "feature": "teleportcrystals:spacial_ore",
   "placement": [
-    { "type": "minecraft:count", "count": 20 },
+    { "type": "minecraft:count", "count": 4 },
     { "type": "minecraft:in_square" },
     {
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
-        "min_inclusive": { "absolute": -60 },
-        "max_inclusive": { "absolute": 250 }
+        "min_inclusive": { "absolute": 10 },
+        "max_inclusive": { "absolute": 64 }
       }
     },
     { "type": "minecraft:biome" }

@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_spacial_shard": {
+      "trigger": "minecraft:item_picked_up",
+      "conditions": {
+        "items": ["teleportcrystals:spacial_shard"]
+      }
+    }
+  },
+  "requirements": [["has_spacial_shard"]],
+  "rewards": {
+    "recipes": ["teleportcrystals:teleport_crystal"]
+  }
+}
