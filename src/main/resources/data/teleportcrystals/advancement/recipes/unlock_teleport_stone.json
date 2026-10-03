@@ -2,9 +2,11 @@
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_amethyst_shard": {
-      "trigger": "minecraft:item_picked_up",
+      "trigger": "minecraft:inventory_changed",
       "conditions": {
-        "items": ["minecraft:amethyst_shard"]
+        "items": [
+          { "items": "minecraft:amethyst_shard" }
+        ]
       }
     }
   },

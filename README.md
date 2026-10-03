@@ -638,3 +638,24 @@ Confirmed: `ruin_camp_wall_2.nbt` currently has `minecraft:iron_ingot` in
 its three filled frames and nothing else - already matches "wall 2 is
 the iron wall" exactly, no changes needed. (And yes, wall 2 = iron, wall
 3 = ender pearl, wall 1 = amethyst - that's exactly how they're set up.)
+
+## Round 19: item_picked_up isn't a real trigger
+
+`minecraft:item_picked_up` - which I'd gotten from a third-party
+"skill" reference site last round - doesn't exist. The actual error was
+blunt about it: "Unknown registry key ... minecraft:item_picked_up".
+That source turned out to be wrong, and I should have cross-checked it
+against something more authoritative (like the actual game code) before
+using it, the way I have for everything else in this file.
+
+Checked Mojang's real class mappings this time: the only registered
+trigger for this is `minecraft:inventory_changed` (the same one vanilla
+itself uses for every item-based recipe unlock). One honest nuance: this
+fires whenever the item enters your inventory by *any* means - picking
+it up, crafting it, creative-mode give, dropping-and-recatching, etc. -
+not specifically "walking over a dropped item." That's not a limitation
+I introduced; it's genuinely the only vanilla mechanism available, and
+it's exactly what every vanilla recipe unlock already uses, so in
+practice it does what you asked.
+
+Both advancement files fixed to use it.
