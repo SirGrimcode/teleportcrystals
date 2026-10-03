@@ -702,3 +702,37 @@ adjustment once you can see where it's landing.
 
 `/locate structure teleportcrystals:valt` will find it the same way the
 Ruin Camp does.
+
+## Round 21: Modrinth display, biome restrictions, matched rotation
+
+### Modrinth only showing Fabric API
+Since the game itself loads the mod fine (your own confirmation, plus
+every earlier log showing `teleportcrystals 1.0.0` loaded and
+initialized), this isn't a real load failure. Likely explanation: the
+Modrinth App's instance "Mods" window tries to match installed mods
+against known Modrinth projects (for icons/descriptions), and probably
+just doesn't render ones it can't match - like a locally-built mod
+that's never been published there. Check the in-game "Mods" button from
+the title screen instead; that reads directly from what Fabric Loader
+actually loaded, which already includes yours. Nothing to fix here.
+
+### Ruin Camp: biome restrictions
+Found that `ruin_camp.json`'s `biomes` field already had an attempt at
+this using `"!#minecraft:is_ocean"`-style entries - that `!` negation
+syntax isn't real vanilla tag syntax (I can't find evidence that
+structure "biomes" fields support exclusion that way, and I'm not
+confident I ever verified it - looks like a leftover guess from the
+first draft of this file that never got checked). Replaced it with an
+explicit list of 24 overworld land biomes - plains, forests, taiga,
+savanna, desert, jungle, badlands, swamp variants, etc. - deliberately
+leaving out every ocean, river, beach, and mountain-group biome
+(windswept hills/peaks, snowy slopes, grove, meadow, stony peaks). This
+is a plain array, so if you want to add or remove a biome later, it's
+just editing that list directly - no tag-logic tricks involved.
+
+### Matching top/room rotation
+`ruin_camp_top.nbt`'s jigsaw had `joint: rollable`, which is what was
+letting the room spawn at a random rotation relative to the top piece.
+Changed it to `aligned` to match the room pieces' side of the
+connection - the room (and whichever wall it picks) should now always
+attach in a fixed, consistent orientation under the top piece.
