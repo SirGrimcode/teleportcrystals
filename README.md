@@ -736,3 +736,30 @@ letting the room spawn at a random rotation relative to the top piece.
 Changed it to `aligned` to match the room pieces' side of the
 connection - the room (and whichever wall it picks) should now always
 attach in a fixed, consistent orientation under the top piece.
+
+## Round 22: merged your grass edit, water reduction
+
+### ruin_camp_top.nbt
+Your new upload was a fresh export straight from your world - still had
+the old `"minecraft:"` pool and `rollable` joint (makes sense, since my
+earlier fixes only ever lived in the file I handed back, not in your
+actual world's jigsaw block). Took your new version (with the added
+grass, 268 blocks vs the old 249) as the base and reapplied both jigsaw
+fixes on top, so you get the grass update without losing the pool/joint
+fixes.
+
+### Reducing water
+Rivers and oceans were already excluded - they're simply not in the
+explicit biome list from last round. Removed `swamp` and
+`mangrove_swamp` too, since those are "land" biomes that are still
+mostly shallow water, which was probably what you were actually running
+into.
+
+One honest limit: I can't guarantee it *never* touches water this way.
+Biome restriction controls which biome a spot has to be, but a plains or
+forest tile can still have a small pond or lake on it, and a structure
+near a biome border can still clip the edge of a river or ocean biome
+next door. Vanilla's own structures (villages included) have this same
+limitation - there's no built-in "avoid all water" check, just biome
+and heightmap placement. This change should make it much rarer, not
+impossible.
