@@ -5,12 +5,15 @@
   "max_distance_from_center": 80,
   "start_height": {
     "type": "minecraft:uniform",
-    "min_inclusive": { "absolute": 10 },
-    "max_inclusive": { "absolute": 100 }
+    "min_inclusive": { "absolute": 38 },
+    "max_inclusive": { "absolute": 64 }
   },
   "step": "underground_structures",
   "terrain_adaptation": "none",
   "use_expansion_hack": false,
-  "biomes": "#minecraft:is_nether",
+  "biomes": [
+    "minecraft:nether_wastes",
+    "minecraft:basalt_deltas"
+  ],
   "spawn_overrides": {}
 }

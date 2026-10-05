@@ -778,3 +778,45 @@ impossible.
 
 (Modrinth confirmed as their own bug, not anything on our end - good to
 have that one closed out.)
+
+## Round 24: Valt height/lava, new End Watch Point structure
+
+### Valt adjustments
+- **Height**: `start_height` is now a uniform Y 38-64 (was 10-100). Since
+  Valt uses no heightmap projection, this value *is* the structure's
+  placement Y directly, which should correspond to its lowest point.
+- **Lava lakes**: there's no real vanilla mechanism to require a
+  structure generate "over" a specific terrain feature like a lava lake -
+  jigsaw placement only knows about biome, height, and spacing, not what
+  terrain is actually beneath a given spot. The practical compromise:
+  restricted Valt's biomes to just `nether_wastes` and `basalt_deltas`,
+  the two Nether biomes where large lava lakes/seas are most common.
+  This should noticeably increase how often it lands near or over lava,
+  but it's a nudge, not a guarantee - I don't want to overstate what this
+  can actually do. Spacing/rarity itself is untouched, per "otherwise I
+  like how often I'm coming across these."
+
+### New structure: End Watch Point
+Same non-jigsaw, multi-variant pattern as Valt - your three towers
+(26/38/48 blocks tall, no jigsaw blocks in any of them) get an equal-
+weight pick (no instruction on relative rarity between the three, so
+1/1/1 for now - say the word if you want them weighted differently).
+
+- **Frequency**: copied End City's exact placement values from the real
+  26.3 game files - `spacing: 20`, `separation: 11`,
+  `spread_type: triangular` (a different `salt` so it doesn't generate
+  at the identical locations as actual End Cities).
+- **Floating 16+ above islands**: `project_start_to_heightmap:
+  WORLD_SURFACE_WG` finds the island surface at that column, and
+  `start_height` (uniform 16-48) is then added as an offset on top of
+  that - so the tower's base should land somewhere between 16 and 48
+  blocks above whatever island is below it.
+- **Never inside an End City**: used vanilla's own `exclusion_zone`
+  mechanism (confirmed real, not a guess - it's literally how vanilla
+  stops some structures overlapping others), pointed at
+  `minecraft:end_cities` with a 3-chunk buffer. Biome-restricted to
+  `#minecraft:is_end` (every End biome, including the main island) since
+  no other biome restriction was asked for.
+
+`/locate structure teleportcrystals:end_watch` works the same way as
+the others.
