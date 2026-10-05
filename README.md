@@ -763,3 +763,18 @@ next door. Vanilla's own structures (villages included) have this same
 limitation - there's no built-in "avoid all water" check, just biome
 and heightmap placement. This change should make it much rarer, not
 impossible.
+
+## Round 23: always-generate wall, room rarity bump
+
+- **Wall pool**: removed the "nothing" (empty) entry entirely. With only
+  the three wall variants left (weights 15/10/5), a wall now always
+  generates whenever `ruin_camp_room` does - the relative odds between
+  the three walls stay the same ratio as before, just normalized to
+  100%: wall_1 50%, wall_2 33.3%, wall_3 16.7%.
+- **Room pool**: `broken_room` 5% -> 10%, `ruin_camp_room` 30% -> 35%,
+  both up 5 points as asked, taken from the "nothing" outcome (65% ->
+  55%). So it's still 65% of the time nothing spawns beneath the top
+  piece.
+
+(Modrinth confirmed as their own bug, not anything on our end - good to
+have that one closed out.)

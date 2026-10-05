@@ -28,10 +28,6 @@
         "processors": "minecraft:empty",
         "projection": "rigid"
       }
-    },
-    {
-      "weight": 70,
-      "element": { "element_type": "minecraft:empty_pool_element" }
     }
   ]
 }
