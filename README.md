@@ -820,3 +820,46 @@ weight pick (no instruction on relative rarity between the three, so
 
 `/locate structure teleportcrystals:end_watch` works the same way as
 the others.
+
+## Round 25: Valt lava biomes, End Watch Point exclusion/loot tweaks
+
+### End Watch Point: avoiding the main island
+A literal "exclude within 450 blocks of X0/Z0" isn't something vanilla
+structure placement actually supports - `RandomSpreadStructurePlacement`
+has no radius-from-a-point field. The real equivalent, and arguably a
+better fit: the main End island has its own unique biome
+(`minecraft:the_end`), found nowhere else, while the four outer-island
+biomes (`end_highlands`, `end_midlands`, `end_barrens`,
+`small_end_islands`) only exist out past it. Swapped the `#minecraft:is_end`
+tag for an explicit list of just those four, so it's now *impossible*
+for one to land on the main island - more reliable than a radius check
+would have been anyway, since a radius can still clip an island that
+straddles the boundary.
+
+### End Watch Point and Valt: chest loot
+All 15 chests across your three End Watch Point variants now reference
+`minecraft:chests/end_city_treasure` directly (the exact table both End
+City room chests and End Ship chests already use) via each chest's
+`LootTable` tag.
+
+### Spacial shards added to End City loot
+Added via Java code (`loot/ModLootTables.java`) using Fabric's
+`LootTableEvents.MODIFY` - confirmed as the correct, current way to do
+this (not a guess): it lets you add an extra pool to an existing loot
+table without touching what's already there, so every vanilla End City
+drop (elytra, enchanted gear, etc.) and anything any other mod/datapack
+adds stays completely intact. This is new code for this project (we'd
+only used JSON loot tables before), so each class/method name
+(`LootPool.lootPool()`, `LootItem.lootTableItem()`,
+`LootItemRandomChanceCondition.randomChance()`, etc.) was checked
+individually against Mojang's real mappings rather than assumed, since
+getting even one wrong would mean another compile-error round. One
+number is a guess: a 25% chance per End City chest for a shard to show
+up - not something you specified, so tune it (the float passed to
+`randomChance(...)`) if you want it rarer or more common.
+
+### Valt
+- Lowest point now spawns Y 38-64, as asked.
+- Restricted to `nether_wastes` and `basalt_deltas` for the lava-lake
+  nudge mentioned last round - worth re-stating since it's easy to miss:
+  this makes landing near lava more likely, it doesn't guarantee it.
