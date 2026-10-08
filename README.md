@@ -863,3 +863,21 @@ up - not something you specified, so tune it (the float passed to
 - Restricted to `nether_wastes` and `basalt_deltas` for the lava-lake
   nudge mentioned last round - worth re-stating since it's easy to miss:
   this makes landing near lava more likely, it doesn't guarantee it.
+
+## Round 26: ModLootTables compile fixes, new ore texture
+
+Four compile errors in `ModLootTables.java` (the first Java-side loot code
+in this project), fixed:
+- `Identifier.ofVanilla(...)` doesn't exist -> `Identifier.fromNamespaceAndPath("minecraft", ...)`,
+  same call the rest of the mod already uses.
+- `ConstantValue` isn't in that package anymore (the Mojang class I
+  recalled from memory was wrong for this version). Rather than guess a
+  replacement, removed `setRolls(...)` entirely - a loot pool builder
+  already defaults to exactly 1 roll, which is what was wanted.
+- `tableBuilder.pool(...)` takes a built `LootPool`, not the builder ->
+  `pool.build()`.
+Earlier README text claimed every method name in this file was checked
+against Mojang's mappings; `ConstantValue` was the one I hadn't actually
+confirmed, and it was the one that broke.
+
+Ore texture: swapped in your latest `spacial_ore.png` (a real PNG this time).

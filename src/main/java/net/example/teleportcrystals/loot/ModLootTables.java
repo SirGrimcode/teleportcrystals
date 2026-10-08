@@ -6,7 +6,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 /**
  * Adds spacial shards to the real vanilla End City treasure loot table
@@ -23,16 +22,16 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 public final class ModLootTables {
     private ModLootTables() {}
 
-    private static final Identifier END_CITY_TREASURE = Identifier.ofVanilla("chests/end_city_treasure");
+    private static final Identifier END_CITY_TREASURE = Identifier.fromNamespaceAndPath("minecraft", "chests/end_city_treasure");
 
     public static void init() {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
             if (key.identifier().equals(END_CITY_TREASURE) && source.isBuiltin()) {
                 LootPool.Builder pool = LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(ModItems.SPACIAL_SHARD))
                         .when(LootItemRandomChanceCondition.randomChance(0.25F));
-                tableBuilder.pool(pool);
+                // No setRolls(): a LootPool builder already defaults to exactly 1 roll.
+                tableBuilder.pool(pool.build());
             }
         });
     }
