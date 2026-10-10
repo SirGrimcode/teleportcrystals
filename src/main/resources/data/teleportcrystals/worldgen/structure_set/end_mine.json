@@ -1,0 +1,14 @@
+{
+  "structures": [
+    { "structure": "teleportcrystals:end_mine", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 16,
+    "separation": 6,
+    "salt": 733915204,
+    "frequency_reduction_method": "default",
+    "frequency": 1.0,
+    "locate_offset": [0, 0, 0]
+  }
+}

@@ -881,3 +881,32 @@ against Mojang's mappings; `ConstantValue` was the one I hadn't actually
 confirmed, and it was the one that broke.
 
 Ore texture: swapped in your latest `spacial_ore.png` (a real PNG this time).
+
+## Round 27: End Watch Point retune, End Mine structure
+
+### End Watch Point
+- **Above Y80**: the lowest point now spawns at a uniform Y 80-112
+  (absolute). To do this I removed the heightmap projection, so it's no
+  longer "16-48 above whatever island is below" - it's a fixed altitude
+  band. Outer-island terrain generally sits well under 80, so this should
+  still clear it, but I haven't measured peak heights; if a tower ever
+  clips an island, raise the 80.
+- **Half as common**: `frequency: 0.5` in `structure_set/end_watch.json`
+  (spacing/separation still match End Cities). That halves the chance each
+  spacing cell produces one, which is exactly "half".
+
+### End Mine (structure only, so far)
+- `end_mine.nbt`: 21x22x19, a hollow carved into the island (air cavity
+  with a small end-stone floor and purpur supports). No jigsaws/chests/
+  entities in it.
+- **Top at Y65**: origin at Y44, because the file's top layer is index 21,
+  so the highest block lands on Y65 (floor ends up around Y53-54).
+- Outer-island biomes only: end_highlands, end_midlands, end_barrens
+  (not the main island; not small_end_islands). Spacing 16 / separation 6
+  is my guess - you didn't give a frequency. Tune in
+  `structure_set/end_mine.json`.
+- Caveat: with a fixed Y it can't see terrain, so where there's no island
+  at Y53-65 you'll get the floor slab hanging in the void.
+- Lizards are NOT wired in yet - they need the mob to exist first. Plan:
+  four variants of the room in the pool at weights 3/1/1/1 = 50% none,
+  then 16.7% each for 1, 2 or 3 lizards.

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:jigsaw",
+  "start_pool": "teleportcrystals:end_mine/start",
+  "size": 1,
+  "max_distance_from_center": 80,
+  "start_height": { "absolute": 44 },
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "use_expansion_hack": false,
+  "biomes": [
+    "minecraft:end_highlands",
+    "minecraft:end_midlands",
+    "minecraft:end_barrens"
+  ],
+  "spawn_overrides": {}
+}

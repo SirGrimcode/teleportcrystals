@@ -1,6 +1,9 @@
 {
   "structures": [
-    { "structure": "teleportcrystals:end_watch", "weight": 1 }
+    {
+      "structure": "teleportcrystals:end_watch",
+      "weight": 1
+    }
   ],
   "placement": {
     "type": "minecraft:random_spread",
@@ -9,8 +12,12 @@
     "salt": 481027395,
     "spread_type": "triangular",
     "frequency_reduction_method": "default",
-    "frequency": 1.0,
-    "locate_offset": [0, 0, 0],
+    "frequency": 0.5,
+    "locate_offset": [
+      0,
+      0,
+      0
+    ],
     "exclusion_zone": {
       "other_set": "minecraft:end_cities",
       "chunk_count": 3
