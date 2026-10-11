@@ -1,6 +1,7 @@
 package net.example.teleportcrystals;
 
 import net.example.teleportcrystals.block.ModBlocks;
+import net.example.teleportcrystals.entity.ModEntities;
 import net.example.teleportcrystals.item.ModItems;
 import net.example.teleportcrystals.loot.ModLootTables;
 import net.example.teleportcrystals.worldgen.ModWorldGen;
@@ -15,6 +16,7 @@ public class TeleportCrystalsMod implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.init();
+        ModEntities.init();
         ModBlocks.init();
         ModWorldGen.init();
         ModLootTables.init();

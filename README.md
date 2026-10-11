@@ -932,3 +932,75 @@ no blocks are placed. So void spots should now produce nothing visible
 instead of a hanging slab. Two honest caveats: `/locate` can still point at
 those empty sites, and I haven't been able to watch this run, so it is
 untested.
+
+## Round 29: End Mine slab aligned to the surface
+
+Undid the "6 below" (that was wrong now that it follows the ground).
+The topmost purpur slab in `end_mine.nbt` is on layer 19 (a bottom slab);
+layers 20-21 above it are open air. The heightmap returns the first free
+block above the ground, so `start_height` is -20: layer 19 lands on the
+top ground block's level, flush with the surface, with the two air layers
+above it open. If you meant the slab sitting one block higher (on top of
+the ground rather than level with it), change -20 to -19.
+
+## Lizard: findings so far (nothing built yet)
+Checked the .bbmodel before writing code: 18 cubes, 4 animations (lick,
+walk, dive, surface). Two things matter:
+- Every cube has hand-placed per-face UVs, none follow a standard box
+  layout, and 10 of 18 cubes have their own arbitrary rotation. Vanilla
+  `ModelPart` cubes only support box-unwrapped UVs, so a straight
+  conversion would put the texture on wrong.
+- GeckoLib (which handles free-UV models) lists support up to 26.2; I
+  found no confirmation for 26.3.
+
+## Round 30: the Spacial Lizard (first full pass, UNTESTED)
+
+Everything below was written without being able to compile or run it.
+Expect a few build-error rounds, same as the rest of this project.
+
+### What exists
+- `entity/SpacialLizard.java`, `entity/ModEntities.java`: the mob
+  (`/summon teleportcrystals:spacial_lizard`). Hostile, 24 HP, 4 damage,
+  hitbox 1.6 x 0.7, never despawns from distance (despawns in Peaceful).
+- Client: `client/model/SpacialLizardModel.java` and
+  `client/animation/SpacialLizardAnimations.java` are GENERATED from your
+  .bbmodel by `tools/bb2java.py` (edit the model, re-run the script, don't
+  hand-edit those two). `client/renderer/...`, `client/ModModelLayers.java`,
+  `client/TeleportCrystalsClient.java` (new "client" entrypoint in
+  fabric.mod.json), texture at `textures/entity/spacial_lizard.png`.
+- 4 animations wired: walk (while moving on the surface), lick, dive,
+  surface.
+
+### Behaviour
+- Idle: moves in bursts (15-30 ticks heading to a random spot nearby, then
+  a 1-3 s pause).
+- Lick: every 5-8 s at rest, every 1.5-2.5 s while it has a target. An idle
+  lick doubles as the smell check: any non-creative player within 24 blocks
+  (walls don't matter) becomes its target.
+- Dive: with a target more than 6 blocks away, standing on end stone, it
+  plays "dive", then tunnels (Vex-style noPhysics) toward a point below the
+  target at 0.32 blocks/tick, never leaving end stone for more than ~8
+  ticks (it surfaces instead of floating over void), then "surface" next to
+  the target and fights normally. 4-7 s cooldown before it can dive again.
+- Speed is attribute 0.28, my guess at sprint speed (~5.6 blocks/s).
+  Compare with a sprinting player and adjust `MOVEMENT_SPEED`.
+
+### End Mine spawning
+Pool is now four variants: `end_mine` (no lizards) weight 3, and
+`end_mine_lizard_1/2/3` weight 1 each = 50% none, 16.7% each for 1/2/3.
+Lizards are placed on the 11x11 floor.
+
+### Things most likely to need a fix after the first build
+1. Import paths for client classes (`net.minecraft.client.animation.*`,
+   `...renderer.entity.state.LivingEntityRenderState`, `EntityRenderers`):
+   standard Mojang paths, not confirmed for 26.3.
+2. `AnimationDefinition.bake(root)` returning `KeyframeAnimation` and
+   `KeyframeAnimation.apply(AnimationState, float)` (from memory of the
+   vanilla pattern; the Fabric docs page only showed part of it).
+3. The model faces -X in Blockbench; I rotate it -90deg. If it walks
+   backwards, flip the sign of the container's yaw in `SpacialLizardModel`
+   (or in `FACING_YAW` in the generator).
+4. Limb rotations use (-x, y, -z) to account for Minecraft's flipped Y axis;
+   if an animation bends the wrong way, that's the sign to look at.
+5. Texture is mapped with a guess (per your OK); it will look wrong until
+   the texture is fixed.

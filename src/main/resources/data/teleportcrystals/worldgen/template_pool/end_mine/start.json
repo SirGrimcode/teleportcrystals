@@ -3,10 +3,37 @@
   "fallback": "minecraft:empty",
   "elements": [
     {
-      "weight": 1,
+      "weight": 3,
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "teleportcrystals:end_mine",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:end_mine_lizard_1",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:end_mine_lizard_2",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "teleportcrystals:end_mine_lizard_3",
         "processors": "minecraft:empty",
         "projection": "rigid"
       }
