@@ -910,3 +910,25 @@ Ore texture: swapped in your latest `spacial_ore.png` (a real PNG this time).
 - Lizards are NOT wired in yet - they need the mob to exist first. Plan:
   four variants of the room in the pool at weights 3/1/1/1 = 50% none,
   then 16.7% each for 1, 2 or 3 lizards.
+
+## Round 28: End Mine follows the island surface, 6 lower
+
+A fixed Y can't know where an island is, which is what left mines hanging
+in mid-air. Switched `end_mine.json` to `project_start_to_heightmap:
+WORLD_SURFACE_WG`, which finds the real ground height under each spot, and
+`start_height` is now an offset from that ground instead of an absolute Y.
+
+Offset math: the file's top layer is index 21 and the heightmap returns
+the first free block above the ground, so a flush-with-surface mine would
+be -22 (top layer at the top ground block); "6 lower" is -28. That means
+the mine's top layer sits 6 blocks below the local ground, with rock over
+it. Old fixed top-at-65 equals this only where the ground is ~Y65; the
+number is now relative to the terrain, not to Y65. One value to tune
+(`start_height`) if it's buried too deep or too shallow.
+
+Where there is no island: the heightmap returns the bottom of the world, so
+the mine would land at around Y -28..-7, below the End's floor (Y0), where
+no blocks are placed. So void spots should now produce nothing visible
+instead of a hanging slab. Two honest caveats: `/locate` can still point at
+those empty sites, and I haven't been able to watch this run, so it is
+untested.

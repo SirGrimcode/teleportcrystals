@@ -3,7 +3,9 @@
   "start_pool": "teleportcrystals:end_mine/start",
   "size": 1,
   "max_distance_from_center": 80,
-  "start_height": { "absolute": 44 },
+  "start_height": {
+    "absolute": -28
+  },
   "step": "underground_structures",
   "terrain_adaptation": "none",
   "use_expansion_hack": false,
@@ -12,5 +14,6 @@
     "minecraft:end_midlands",
     "minecraft:end_barrens"
   ],
-  "spawn_overrides": {}
+  "spawn_overrides": {},
+  "project_start_to_heightmap": "WORLD_SURFACE_WG"
 }
