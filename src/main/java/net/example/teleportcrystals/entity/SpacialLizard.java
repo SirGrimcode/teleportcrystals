@@ -51,13 +51,13 @@ public class SpacialLizard extends Monster {
             SynchedEntityData.defineId(SpacialLizard.class, EntityDataSerializers.INT);
 
     // Tuning knobs
-    private static final int DIVE_TICKS = 11;            // the dive animation reaches full depth at ~0.54s
+    private static final int DIVE_TICKS = 60;            // 3 seconds; must match the dive animation length in bb2java.py
+    private static final double UNDERGROUND_DEPTH = 1.5; // how far below the surface it ends up after diving
     private static final int SURFACING_MAX_TICKS = 14;
     private static final double BURROW_SPEED = 0.32;     // blocks per tick while tunnelling
     private static final double SMELL_RANGE = 24.0;
     private static final int DIVE_COOLDOWN = 0;             // ticks between dives; 0 = no limit in a fight
     private static final double MIN_DIVE_DISTANCE_SQ = 0.0; // only dive if the target is farther than this (squared); 0 = always
-    private static final int MAX_DESCENT_TICKS = 20;
     private static final double APPROACH_DISTANCE = 0.9;    // surfaces when this close (horizontally) to the target
     private static final double EMERGE_REACH_SQ = 9.0;      // emerging hits a target within 3 blocks
     private static final int IDLE_LICK_MIN = 100;        // 5 seconds
@@ -75,7 +75,6 @@ public class SpacialLizard extends Monster {
     private int lickTimer;
     private int outsideStoneTicks;
     private double surfaceY;
-    private boolean descended;
     private boolean emergeHit;
 
     public SpacialLizard(EntityType<? extends SpacialLizard> type, Level level) {
@@ -156,7 +155,7 @@ public class SpacialLizard extends Monster {
         super.onSyncedDataUpdated(data);
         if (data == STATE) {
             int s = this.entityData.get(STATE);
-            this.diveAnimationState.animateWhen(s == STATE_DIVING || s == STATE_BURROWED, this.tickCount);
+            this.diveAnimationState.animateWhen(s == STATE_DIVING, this.tickCount);
             this.surfaceAnimationState.animateWhen(s == STATE_SURFACING, this.tickCount);
         } else if (data == LICK_COUNT) {
             this.lickAnimationState.start(this.tickCount);
@@ -172,7 +171,9 @@ public class SpacialLizard extends Monster {
         this.noPhysics = false;
 
         if (this.level().isClientSide()) {
-            boolean moving = isOnSurface() && this.getDeltaMovement().horizontalDistanceSqr() > 2.5E-7;
+            double mx = this.getX() - this.xo;
+            double mz = this.getZ() - this.zo;
+            boolean moving = (isOnSurface() || getLizardState() == STATE_BURROWED) && (mx * mx + mz * mz) > 1.0E-5;
             this.walkAnimationState.animateWhen(moving, this.tickCount);
             return;
         }
@@ -188,17 +189,20 @@ public class SpacialLizard extends Monster {
                 tickLick(target);
                 if (target != null && target.isAlive() && this.diveCooldown <= 0 && this.onGround()
                         && this.distanceToSqr(target) > MIN_DIVE_DISTANCE_SQ
-                        && this.level().getBlockState(this.blockPosition().below()).is(Blocks.END_STONE)) {
+                        && this.level().getBlockState(this.blockPosition().below()).is(Blocks.END_STONE)
+                        && this.level().getBlockState(this.blockPosition().below(2)).is(Blocks.END_STONE)) {
                     this.getNavigation().stop();
                     setLizardState(STATE_DIVING);
                 }
             }
             case STATE_DIVING -> {
-                this.setDeltaMovement(0.0, this.getDeltaMovement().y, 0.0);
+                // The dive animation moves the model up and then down into the ground while the
+                // lizard itself stays put. When it finishes, the lizard is really underground.
+                holdStill();
                 if (this.stateTicks >= DIVE_TICKS) {
+                    this.setPos(this.getX(), this.getY() - UNDERGROUND_DEPTH, this.getZ());
                     this.setNoGravity(true);
                     this.outsideStoneTicks = 0;
-                    this.descended = false;
                     setLizardState(STATE_BURROWED);
                 }
             }
@@ -208,27 +212,20 @@ public class SpacialLizard extends Monster {
         }
     }
 
+    private void holdStill() {
+        this.getNavigation().stop();
+        this.setZza(0.0F);
+        this.setXxa(0.0F);
+    }
+
     private void burrowedTick(LivingEntity target) {
+        holdStill(); // no ground-style movement input while underground
         if (target == null || !target.isAlive() || this.stateTicks > 400) {
             beginSurfacing();
             return;
         }
-        // Phase 1: sink straight down, no sideways movement, until the lizard is fully
-        // covered by end stone. Only then does it start travelling.
-        if (!this.descended) {
-            boolean covered = this.level().getBlockState(this.blockPosition()).is(Blocks.END_STONE)
-                    && this.level().getBlockState(this.blockPosition().above()).is(Blocks.END_STONE);
-            if (covered) {
-                this.descended = true;
-            } else if (this.stateTicks > MAX_DESCENT_TICKS) {
-                beginSurfacing(); // couldn't get underground (not enough end stone here)
-                return;
-            } else {
-                this.setDeltaMovement(0.0, -0.3, 0.0);
-                return;
-            }
-        }
-        // Phase 2: tunnel toward the target, staying about 1.5 blocks under their feet.
+        // Tunnel toward the target, staying about 1.5 blocks under their feet. The only way back
+        // out is beginSurfacing() -> the surface animation.
         double dx = target.getX() - this.getX();
         double dz = target.getZ() - this.getZ();
         double horizontal = Math.sqrt(dx * dx + dz * dz);
@@ -243,7 +240,7 @@ public class SpacialLizard extends Monster {
             beginSurfacing();
             return;
         }
-        double desiredY = target.getY() - 1.5;
+        double desiredY = target.getY() - UNDERGROUND_DEPTH;
         double vy = Mth.clamp((desiredY - this.getY()) * 0.3, -0.25, 0.25);
         double step = Math.min(BURROW_SPEED, horizontal); // don't overshoot the target
         double len = Math.max(horizontal, 1.0E-4);

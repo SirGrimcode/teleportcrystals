@@ -5,6 +5,7 @@ groups = {g['uuid']: g for g in m['groups']}
 SKIP_GROUPS = {'hitbox'}
 FACING_YAW = -math.pi/2   # bb model faces -X; Mojang models face -Z
 warnings = []
+TARGET_LENGTH = {'dive': 3.0}   # seconds; the dive is stretched to this length
 
 def f(x):
     x = round(float(x), 5)
@@ -145,7 +146,8 @@ for a in m['animations']:
     const = anim_names.get(a['name'].lower())
     if not const:
         warnings.append('animation %r has no mapping, skipped' % a['name']); continue
-    b = 'AnimationDefinition.Builder.withLength(%s)' % f(a['length'])
+    stretch = TARGET_LENGTH.get(a['name'].lower(), a['length']) / a['length']
+    b = 'AnimationDefinition.Builder.withLength(%s)' % f(a['length'] * stretch)
     if a.get('loop') == 'loop': b += '\n\t\t\t.looping()'
     for uid, an in a['animators'].items():
         gname = groups[uid]['name'] if uid in groups else an.get('name')
@@ -167,7 +169,7 @@ for a in m['animations']:
                 interp = 'CATMULLROM' if k.get('interpolation') == 'catmullrom' else 'LINEAR'
                 if k.get('interpolation') not in ('linear', 'catmullrom', None):
                     warnings.append('interpolation %r on %s/%s -> LINEAR' % (k.get('interpolation'), a['name'], gname))
-                kfs.append('new Keyframe(%s, %s, AnimationChannel.Interpolations.%s)' % (f(k['time']), vec, interp))
+                kfs.append('new Keyframe(%s, %s, AnimationChannel.Interpolations.%s)' % (f(k['time'] * stretch), vec, interp))
             b += '\n\t\t\t.addAnimation("%s", new AnimationChannel(AnimationChannel.Targets.%s,\n\t\t\t\t%s))' % (gname, tgt, ',\n\t\t\t\t'.join(kfs))
     b += '\n\t\t\t.build()'
     adefs.append('\tpublic static final AnimationDefinition %s = %s;' % (const, b))

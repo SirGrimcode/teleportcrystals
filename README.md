@@ -1023,3 +1023,20 @@ Lizards are placed on the 11x11 floor.
   watch for: it will rarely melee, since it dives again right after
   surfacing. If that's too much, raise `DIVE_COOLDOWN` (ticks) or
   `MIN_DIVE_DISTANCE_SQ` at the top of `SpacialLizard.java`.
+
+## Round 32: lizard states rebuilt to match the intended design
+
+The log showed no errors, so this was a design mismatch, not a crash. I had
+the dive pose held for the entire underground trip and the entity sinking
+afterwards. Now:
+- **Dive** (3 s, stretched from the authored 1.08 s by `TARGET_LENGTH` in
+  `tools/bb2java.py`; `DIVE_TICKS = 60` in `SpacialLizard.java` must match):
+  plays on the spot, up and down only, no movement. When it ends the lizard
+  is physically 1.5 blocks underground. Needs two blocks of end stone below
+  it to start.
+- **Underground**: dive animation is off; it uses its normal WALK animation
+  (now driven by the lizard's real position change on the client, which is
+  more reliable than velocity) and tunnels toward the target. Ground-style
+  movement input is cleared every tick. The only exit is the surface
+  animation.
+- **Surface**: rises at the target's feet, hurts them once on the way out.
