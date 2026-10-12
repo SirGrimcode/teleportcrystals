@@ -1004,3 +1004,22 @@ Lizards are placed on the 11x11 floor.
    if an animation bends the wrong way, that's the sign to look at.
 5. Texture is mapped with a guess (per your OK); it will look wrong until
    the texture is fixed.
+
+## Round 31: lizard burrow rework (the first lizard build compiled clean)
+
+- **Suffocation**: it was only skipping collisions, not the in-wall damage.
+  `SpacialLizard.hurtServer(...)` now ignores `DamageTypes.IN_WALL`.
+- **"Flying over"**: after the dive animation it went straight into
+  horizontal travel while still level with the ground, sinking only
+  gradually in flight. Burrowing is now two phases: (1) straight down, no
+  sideways movement, until fully inside end stone (gives up and surfaces
+  after 20 ticks if there isn't enough stone); (2) tunnel toward the
+  target at ~1.5 blocks under their feet, without overshooting.
+- **Emergence**: it surfaces when within 0.9 blocks horizontally of the
+  target (their feet), and the burst out hurts them once (its attack
+  damage, plus a small upward knock) if they're within 3 blocks.
+- **Dive limits removed**: no cooldown and no minimum distance - it dives
+  whenever it has a target and is standing on end stone. Consequence to
+  watch for: it will rarely melee, since it dives again right after
+  surfacing. If that's too much, raise `DIVE_COOLDOWN` (ticks) or
+  `MIN_DIVE_DISTANCE_SQ` at the top of `SpacialLizard.java`.

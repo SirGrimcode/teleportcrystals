@@ -4,7 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,6 +55,11 @@ public class SpacialLizard extends Monster {
     private static final int SURFACING_MAX_TICKS = 14;
     private static final double BURROW_SPEED = 0.32;     // blocks per tick while tunnelling
     private static final double SMELL_RANGE = 24.0;
+    private static final int DIVE_COOLDOWN = 0;             // ticks between dives; 0 = no limit in a fight
+    private static final double MIN_DIVE_DISTANCE_SQ = 0.0; // only dive if the target is farther than this (squared); 0 = always
+    private static final int MAX_DESCENT_TICKS = 20;
+    private static final double APPROACH_DISTANCE = 0.9;    // surfaces when this close (horizontally) to the target
+    private static final double EMERGE_REACH_SQ = 9.0;      // emerging hits a target within 3 blocks
     private static final int IDLE_LICK_MIN = 100;        // 5 seconds
     private static final int IDLE_LICK_RANGE = 61;       // up to 8 seconds
     private static final int FIGHT_LICK_MIN = 30;        // licks more often while it has a target
@@ -63,10 +71,12 @@ public class SpacialLizard extends Monster {
     public final AnimationState walkAnimationState = new AnimationState();
 
     private int stateTicks;
-    private int diveCooldown = 40;
+    private int diveCooldown = 0;
     private int lickTimer;
     private int outsideStoneTicks;
     private double surfaceY;
+    private boolean descended;
+    private boolean emergeHit;
 
     public SpacialLizard(EntityType<? extends SpacialLizard> type, Level level) {
         super(type, level);
@@ -128,6 +138,15 @@ public class SpacialLizard extends Monster {
     }
 
     @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        // Lizards live inside solid blocks; never take suffocation damage.
+        if (source.is(DamageTypes.IN_WALL)) {
+            return false;
+        }
+        return super.hurtServer(level, source, amount);
+    }
+
+    @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false; // structure lizards stay put instead of despawning
     }
@@ -168,7 +187,7 @@ public class SpacialLizard extends Monster {
                 if (this.diveCooldown > 0) this.diveCooldown--;
                 tickLick(target);
                 if (target != null && target.isAlive() && this.diveCooldown <= 0 && this.onGround()
-                        && this.distanceToSqr(target) > 36.0
+                        && this.distanceToSqr(target) > MIN_DIVE_DISTANCE_SQ
                         && this.level().getBlockState(this.blockPosition().below()).is(Blocks.END_STONE)) {
                     this.getNavigation().stop();
                     setLizardState(STATE_DIVING);
@@ -179,6 +198,7 @@ public class SpacialLizard extends Monster {
                 if (this.stateTicks >= DIVE_TICKS) {
                     this.setNoGravity(true);
                     this.outsideStoneTicks = 0;
+                    this.descended = false;
                     setLizardState(STATE_BURROWED);
                 }
             }
@@ -193,25 +213,41 @@ public class SpacialLizard extends Monster {
             beginSurfacing();
             return;
         }
+        // Phase 1: sink straight down, no sideways movement, until the lizard is fully
+        // covered by end stone. Only then does it start travelling.
+        if (!this.descended) {
+            boolean covered = this.level().getBlockState(this.blockPosition()).is(Blocks.END_STONE)
+                    && this.level().getBlockState(this.blockPosition().above()).is(Blocks.END_STONE);
+            if (covered) {
+                this.descended = true;
+            } else if (this.stateTicks > MAX_DESCENT_TICKS) {
+                beginSurfacing(); // couldn't get underground (not enough end stone here)
+                return;
+            } else {
+                this.setDeltaMovement(0.0, -0.3, 0.0);
+                return;
+            }
+        }
+        // Phase 2: tunnel toward the target, staying about 1.5 blocks under their feet.
         double dx = target.getX() - this.getX();
         double dz = target.getZ() - this.getZ();
         double horizontal = Math.sqrt(dx * dx + dz * dz);
-        if (horizontal < 2.0 && this.stateTicks > 15) {
+        if (horizontal < APPROACH_DISTANCE) {
             beginSurfacing();
             return;
         }
-        // Keep tunnelling only while actually inside end stone; otherwise come up.
         boolean inStone = this.level().getBlockState(this.blockPosition()).is(Blocks.END_STONE)
                 || this.level().getBlockState(this.blockPosition().above()).is(Blocks.END_STONE);
         this.outsideStoneTicks = inStone ? 0 : this.outsideStoneTicks + 1;
-        if (this.stateTicks > 20 && this.outsideStoneTicks > 8) {
+        if (this.outsideStoneTicks > 8) {
             beginSurfacing();
             return;
         }
-        double desiredY = target.getY() - 1.3;
+        double desiredY = target.getY() - 1.5;
         double vy = Mth.clamp((desiredY - this.getY()) * 0.3, -0.25, 0.25);
+        double step = Math.min(BURROW_SPEED, horizontal); // don't overshoot the target
         double len = Math.max(horizontal, 1.0E-4);
-        this.setDeltaMovement(dx / len * BURROW_SPEED, vy, dz / len * BURROW_SPEED);
+        this.setDeltaMovement(dx / len * step, vy, dz / len * step);
         float yaw = (float) (Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0F;
         this.setYRot(yaw);
         this.yBodyRot = yaw;
@@ -230,10 +266,22 @@ public class SpacialLizard extends Monster {
             }
         }
         this.surfaceY = found;
+        this.emergeHit = false;
         setLizardState(STATE_SURFACING);
     }
 
     private void surfacingTick() {
+        // Bursting out of the ground hurts whoever is standing there (once per emergence).
+        if (!this.emergeHit) {
+            this.emergeHit = true;
+            LivingEntity target = this.getTarget();
+            if (target != null && target.isAlive() && this.distanceToSqr(target) < EMERGE_REACH_SQ
+                    && this.level() instanceof ServerLevel serverLevel) {
+                target.hurtServer(serverLevel, this.damageSources().mobAttack(this),
+                        (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                target.push(0.0, 0.4, 0.0);
+            }
+        }
         double dy = this.surfaceY - this.getY();
         if (dy > 0.05 && this.stateTicks < SURFACING_MAX_TICKS) {
             this.setDeltaMovement(0.0, Math.min(0.3, dy), 0.0);
@@ -241,7 +289,7 @@ public class SpacialLizard extends Monster {
             this.setPos(this.getX(), Math.max(this.getY(), this.surfaceY), this.getZ());
             this.setDeltaMovement(Vec3.ZERO);
             this.setNoGravity(false);
-            this.diveCooldown = 80 + this.random.nextInt(60);
+            this.diveCooldown = DIVE_COOLDOWN;
             setLizardState(STATE_SURFACE);
         }
     }
