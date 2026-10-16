@@ -164,7 +164,7 @@ for a in m['animations']:
                 dp = k['data_points'][0]
                 x, y, z = (num(dp.get(c, 0), a['name']+'/'+gname) for c in 'xyz')
                 if ch == 'rotation': vec = 'KeyframeAnimations.degreeVec(%s, %s, %s)' % (f(-x), f(y), f(-z))
-                elif ch == 'position': vec = 'KeyframeAnimations.posVec(%s, %s, %s)' % (f(x), f(-y), f(z))
+                elif ch == 'position': vec = 'KeyframeAnimations.posVec(%s, %s, %s)' % (f(x), f(y), f(z))  # posVec already flips Y itself
                 else: vec = 'KeyframeAnimations.scaleVec(%s, %s, %s)' % (f(x), f(y), f(z))
                 interp = 'CATMULLROM' if k.get('interpolation') == 'catmullrom' else 'LINEAR'
                 if k.get('interpolation') not in ('linear', 'catmullrom', None):

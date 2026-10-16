@@ -1040,3 +1040,17 @@ afterwards. Now:
   movement input is cleared every tick. The only exit is the surface
   animation.
 - **Surface**: rises at the target's feet, hurts them once on the way out.
+
+## Round 33: the real cause of the "flying" lizards (found from the video)
+
+Frames from the video show lizards hanging several blocks in the air with
+their shadows on the ground far below. Cause: `KeyframeAnimations.posVec`
+already flips the Y axis, and `tools/bb2java.py` flipped it again, so every
+position keyframe was upside down. The dive's 50-pixel sink became a
+50-pixel climb (and the 26-pixel leap became a dip). Rotations and scale
+were not affected. `bb2java.py` now passes Y through unchanged and the
+animations were regenerated; this also fixes the same inversion in the
+walk, lick and surface animations.
+
+Side effect to know about: with the dive stretched to 3 s, the leap and
+sink finish at about 1.5 s and the pose is then held until 3 s.
