@@ -51,9 +51,10 @@ public class SpacialLizard extends Monster {
             SynchedEntityData.defineId(SpacialLizard.class, EntityDataSerializers.INT);
 
     // Tuning knobs
-    private static final int DIVE_TICKS = 60;            // 3 seconds; must match the dive animation length in bb2java.py
+    private static final int DIVE_TICKS = 13;            // dive animation is 0.625 s (12.5 ticks); keep in sync with the .bbmodel
     private static final double UNDERGROUND_DEPTH = 1.5; // how far below the surface it ends up after diving
     private static final int SURFACING_MAX_TICKS = 14;
+    private static final double RISE_SPEED = 0.2;       // blocks per tick while surfacing
     private static final double BURROW_SPEED = 0.32;     // blocks per tick while tunnelling
     private static final double SMELL_RANGE = 24.0;
     private static final int DIVE_COOLDOWN = 0;             // ticks between dives; 0 = no limit in a fight
@@ -281,7 +282,7 @@ public class SpacialLizard extends Monster {
         }
         double dy = this.surfaceY - this.getY();
         if (dy > 0.05 && this.stateTicks < SURFACING_MAX_TICKS) {
-            this.setDeltaMovement(0.0, Math.min(0.3, dy), 0.0);
+            this.setDeltaMovement(0.0, Math.min(RISE_SPEED, dy), 0.0); // ~7-8 ticks to match the 0.417 s surface animation
         } else {
             this.setPos(this.getX(), Math.max(this.getY(), this.surfaceY), this.getZ());
             this.setDeltaMovement(Vec3.ZERO);

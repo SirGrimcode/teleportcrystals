@@ -1,11 +1,13 @@
-import json, math, sys
-m = json.load(open('/mnt/user-data/uploads/spacial_lizard_1_.bbmodel'))
+import json, math, sys, os
+from PIL import Image
+HERE = os.path.dirname(os.path.abspath(__file__))
+m = json.load(open(os.path.join(HERE, 'spacial_lizard.bbmodel')))
 els = {e['uuid']: e for e in m['elements']}
 groups = {g['uuid']: g for g in m['groups']}
 SKIP_GROUPS = {'hitbox'}
 FACING_YAW = -math.pi/2   # bb model faces -X; Mojang models face -Z
 warnings = []
-TARGET_LENGTH = {'dive': 3.0}   # seconds; the dive is stretched to this length
+TARGET_LENGTH = {}   # per-animation stretch to a fixed length in seconds, e.g. {'dive': 3.0}; empty = as authored
 
 def f(x):
     x = round(float(x), 5)
@@ -13,13 +15,77 @@ def f(x):
     if s.endswith('.0'): s = s[:-2]
     return s + 'F'
 
+
+# ---------------------------------------------------------------------------
+# Vanilla ModelPart cubes only support the standard "box" UV layout, but the
+# Blockbench model maps every face by hand. So we re-bake: each face's pixels are
+# copied from the source skin into the slot the box layout expects, in a new atlas.
+# ---------------------------------------------------------------------------
+ATLAS = 128
+SKIN = Image.open(os.path.join(HERE, 'spacial_lizard_skin_source.png')).convert('RGBA')
+TEX_RES = m['resolution']['width']          # UVs in the bbmodel are in this resolution
+_sx = SKIN.width / TEX_RES; _sy = SKIN.height / m['resolution']['height']
+atlas = Image.new('RGBA', (ATLAS, ATLAS), (0, 0, 0, 0))
+texmap = {}
+
+def cube_dims(e):
+    fr, to = e['from'], e['to']
+    return [abs(to[i]-fr[i]) for i in range(3)]
+
+def face_image(face, size):
+    u = face['uv']
+    x1, x2 = sorted((u[0], u[2])); y1, y2 = sorted((u[1], u[3]))
+    box = (int(round(x1*_sx)), int(round(y1*_sy)), max(int(round(x2*_sx)), int(round(x1*_sx))+1), max(int(round(y2*_sy)), int(round(y1*_sy))+1))
+    img = SKIN.crop(box)
+    if u[2] < u[0]: img = img.transpose(Image.FLIP_LEFT_RIGHT)
+    if u[3] < u[1]: img = img.transpose(Image.FLIP_TOP_BOTTOM)
+    rot = face.get('rotation', 0) or 0
+    if rot: img = img.rotate(-rot, expand=True)       # Blockbench rotates clockwise
+    if img.size != size: img = img.resize(size, Image.NEAREST)
+    return img
+
+def pack(cubes):
+    # simple shelf packer, tallest first
+    items = []
+    for e in cubes:
+        dx, dy, dz = [int(round(v)) for v in cube_dims(e)]
+        items.append((e, 2*(dx+dz), dz+dy))
+    items.sort(key=lambda t: -t[2])
+    x = y = shelf = 0
+    for e, w, h in items:
+        if x + w > ATLAS: x, y, shelf = 0, y + shelf, 0
+        assert y + h <= ATLAS, 'atlas too small'
+        texmap[e['uuid']] = (x, y)
+        x += w; shelf = max(shelf, h)
+
+real_cubes = [e for e in m['elements'] if e['name'] != 'hitbox']
+pack(real_cubes)
+for e in real_cubes:
+    dx, dy, dz = [int(round(v)) for v in cube_dims(e)]
+    u0, v0 = texmap[e['uuid']]
+    slots = {   # name: (x, y, w, h) in the standard box layout
+        'up':    (u0+dz,        v0,    dx, dz),
+        'down':  (u0+dz+dx,     v0,    dx, dz),
+        'east':  (u0,           v0+dz, dz, dy),
+        'north': (u0+dz,        v0+dz, dx, dy),
+        'west':  (u0+dz+dx,     v0+dz, dz, dy),
+        'south': (u0+2*dz+dx,   v0+dz, dx, dy),
+    }
+    for fname, (sx, sy, sw, sh) in slots.items():
+        if sw <= 0 or sh <= 0: continue
+        face = e['faces'].get(fname)
+        if not face or face.get('texture') is None: continue
+        img = face_image(face, (sw, sh))
+        if fname == 'down': img = img.transpose(Image.FLIP_TOP_BOTTOM)   # the down slot is stored upside down
+        atlas.paste(img, (sx, sy))
+out_tex = os.path.join(HERE, '..', 'src/main/resources/assets/teleportcrystals/textures/entity/spacial_lizard.png')
+os.makedirs(os.path.dirname(out_tex), exist_ok=True)
+atlas.save(out_tex)
+
 def rad(d): return math.radians(d)
 
 def tex_off(e):
-    fr, to = e['from'], e['to']
-    dz = abs(to[2]-fr[2])
-    up = e['faces']['up']['uv']
-    return max(0, int(round(up[0]-dz))), max(0, int(round(up[1])))
+    return texmap[e['uuid']]
 
 lines = []
 def emit_group(g, parent_pivot, parent_var, depth):
@@ -112,7 +178,7 @@ public class SpacialLizardModel extends EntityModel<SpacialLizardRenderState> {
 		PartDefinition container = rootDef.addOrReplaceChild("container", CubeListBuilder.create(),
 			PartPose.offsetAndRotation(0F, 24F, 0F, 0F, %(yaw)s, 0F));
 %(body)s
-		return LayerDefinition.create(mesh, 64, 64);
+		return LayerDefinition.create(mesh, %(tex)d, %(tex)d);
 	}
 
 	@Override
@@ -132,7 +198,7 @@ public class SpacialLizardModel extends EntityModel<SpacialLizardRenderState> {
 		}
 	}
 }
-''' % {'yaw': f(FACING_YAW), 'body': model_body}
+''' % {'yaw': f(FACING_YAW), 'body': model_body, 'tex': ATLAS}
 
 # ---- animations ----
 def num(v, where):
@@ -188,7 +254,7 @@ public class SpacialLizardAnimations {
 ''' % '\n\n'.join(adefs)
 
 import os
-base = '/home/claude/mod/extracted/teleportcrystals/src/main/java/net/example/teleportcrystals/client'
+base = os.path.join(HERE, '..', 'src/main/java/net/example/teleportcrystals/client')
 os.makedirs(base + '/model', exist_ok=True); os.makedirs(base + '/animation', exist_ok=True)
 open(base + '/model/SpacialLizardModel.java', 'w').write(java_model)
 open(base + '/animation/SpacialLizardAnimations.java', 'w').write(java_anim)

@@ -1054,3 +1054,26 @@ walk, lick and surface animations.
 
 Side effect to know about: with the dive stretched to 3 s, the leap and
 sink finish at about 1.5 s and the pose is then held until 3 s.
+
+## Round 34: new animations, re-baked skin
+
+- **Animations**: regenerated from your modified model (`tools/spacial_lizard.bbmodel`).
+  Dive is now 0.625 s and surface 0.417 s as authored; I removed the 3 s
+  stretch (`TARGET_LENGTH` is empty) since you shortened it yourself.
+  `DIVE_TICKS` is 13 and the surfacing rise is 0.2 blocks/tick (~7-8 ticks)
+  to match. Geometry was unchanged from the previous model.
+- **Skin**: vanilla entity models can only use the standard box UV layout,
+  but your model maps each face by hand, which is why it looked wrong. The
+  converter now re-bakes the skin: every face's pixels are copied from your
+  texture (`tools/spacial_lizard_skin_source.png`) into the slot the box
+  layout expects, in a new 128x128 atlas written to
+  `textures/entity/spacial_lizard.png`. Every cube here has whole-number
+  dimensions and no rotated/mirrored faces, so the copy is pixel-for-pixel
+  (verified for the head and tongue; the tongue's top face is the red
+  pixel, and both cyan eye pixels are in the atlas).
+- To change the skin: edit `tools/spacial_lizard_skin_source.png` (keep your
+  Blockbench UV layout) and run `python3 tools/bb2java.py` - it regenerates
+  the model, animations AND the baked atlas. Don't paint on the atlas.
+- Unverified: which side a face lands on (east vs west) relies on Blockbench's
+  box layout matching Minecraft's; if legs/sides look swapped left-right,
+  that is the place to look.
