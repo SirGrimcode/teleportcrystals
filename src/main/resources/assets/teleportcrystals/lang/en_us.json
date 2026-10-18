@@ -3,5 +3,6 @@
   "item.teleportcrystals.teleport_crystal": "Teleport Crystal",
   "block.teleportcrystals.spacial_ore": "Spacial Ore",
   "item.teleportcrystals.spacial_shard": "Spacial Shard",
-  "entity.teleportcrystals.spacial_lizard": "Spacial Lizard"
+  "entity.teleportcrystals.spacial_lizard": "Spacial Lizard",
+  "item.teleportcrystals.spacial_lizard_spawn_egg": "Spacial Lizard Spawn Egg"
 }

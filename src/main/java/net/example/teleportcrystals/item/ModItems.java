@@ -1,6 +1,7 @@
 package net.example.teleportcrystals.item;
 
 import net.example.teleportcrystals.TeleportCrystalsMod;
+import net.example.teleportcrystals.entity.ModEntities;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,6 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 
 import java.util.function.Function;
 
@@ -32,6 +34,11 @@ public final class ModItems {
     public static final Item SPACIAL_SHARD = register("spacial_shard",
             properties -> new Item(properties.stacksTo(64)));
 
+    // Spawn egg for the lizard. Colours come from the item texture; the entity is bound via
+    // Item.Properties#spawnEgg (26.x style, per Fabric's 26.1.2 spawn egg docs).
+    public static final Item SPACIAL_LIZARD_SPAWN_EGG = register("spacial_lizard_spawn_egg",
+            properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.SPACIAL_LIZARD)));
+
     // An item's Properties must have its own registry id set via .setId(...)
     // *before* the item is constructed - the item's constructor reads it
     // immediately (for its description id) and throws a NullPointerException
@@ -50,6 +57,9 @@ public final class ModItems {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
             output.accept(TELEPORT_STONE);
             output.accept(TELEPORT_CRYSTAL);
+        });
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> {
+            output.accept(SPACIAL_LIZARD_SPAWN_EGG);
         });
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
             output.accept(SPACIAL_SHARD);

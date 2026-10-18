@@ -1077,3 +1077,18 @@ sink finish at about 1.5 s and the pose is then held until 3 s.
 - Unverified: which side a face lands on (east vs west) relies on Blockbench's
   box layout matching Minecraft's; if legs/sides look swapped left-right,
   that is the place to look.
+
+## Round 35: Spacial Lizard spawn egg
+
+- `teleportcrystals:spacial_lizard_spawn_egg` in the Spawn Eggs creative tab.
+  Registered through the existing `ModItems.register` factory as
+  `new SpawnEggItem(properties.spawnEgg(ModEntities.SPACIAL_LIZARD))` - the
+  26.x API from Fabric's 26.1.2 spawn-egg docs (older versions took the
+  entity and two colours in the constructor; that is gone).
+- Sprite: your `lizard_egg.jpg` converted to a real PNG. JPEGs can't be
+  transparent, so the near-white background was removed by flood-filling in
+  from the edges (the egg's own light highlights are kept) and one stray
+  noise pixel was deleted. To replace it, save a PNG with real transparency
+  at `textures/item/spacial_lizard_spawn_egg.png`.
+- Needed the usual three files: `models/item/...json`, the client item
+  `items/spacial_lizard_spawn_egg.json`, and the lang entry.
