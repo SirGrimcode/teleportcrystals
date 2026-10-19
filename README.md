@@ -1,5 +1,18 @@
 # Teleport Crystals
 
+Created by **Sir_Grimcode**, developed together with **Claude** (an AI assistant made by Anthropic).
+
+Licensed under the **GNU Lesser General Public License v3.0** (`LGPL-3.0-only`). See
+`LICENSE`, `COPYING` and `NOTICE`. In short: you may use, modify and redistribute this
+mod, including in modpacks; changes you make to its files must be shared under the same
+license, and credit/notices must be kept. This applies to the code, data pack files,
+textures, models and structures. Minecraft and Fabric are separate works under their
+own terms.
+
+---
+
+# Teleport Crystals
+
 Ported from Minecraft 1.21.1 (Yarn mappings) to **Minecraft 26.3** (Fabric,
 Mojang's official mappings - Yarn is no longer used as of 26.1).
 
@@ -1092,3 +1105,14 @@ sink finish at about 1.5 s and the pose is then held until 3 s.
   at `textures/item/spacial_lizard_spawn_egg.png`.
 - Needed the usual three files: `models/item/...json`, the client item
   `items/spacial_lizard_spawn_egg.json`, and the lang entry.
+
+## Round 36: license and credits
+- License set to LGPL-3.0 (`LICENSE` = LGPL text, `COPYING` = GPL-3.0 text, both verbatim
+  from the FSF versions; `NOTICE` = copyright, credits and what is not covered).
+- `fabric.mod.json`: license `LGPL-3.0-only`, author Sir_Grimcode, contributor Claude,
+  source/issues links pointing at github.com/SirGrimcode/teleportcrystals (taken from
+  your CI logs - change if wrong), and a description updated for everything the mod
+  now contains (it still described only the two crystals).
+- `build.gradle`: the jar now bundles LICENSE, COPYING and NOTICE.
+- On Modrinth, pick license "LGPL-3.0" and fill in the Source link. The LGPL expects
+  recipients to be able to get the source, so keep the repository public.

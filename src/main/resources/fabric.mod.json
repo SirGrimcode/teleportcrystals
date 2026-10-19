@@ -3,12 +3,15 @@
   "id": "teleportcrystals",
   "version": "${version}",
   "name": "Teleport Crystals",
-  "description": "Adds two crafted crystals that teleport you to a location you bind: a cheap one-use stone, and a pricier durable wand that can take Unbreaking and Mending.",
+  "description": "Teleport crystals you bind to a location (a cheap one-use stone and a durable crystal), Spacial Ore from the outer End islands, the Ruin Camp, Valt, End Watch Point and End Mine structures, and the burrowing Spacial Lizard.",
   "authors": [
-    "you"
+    "Sir_Grimcode"
   ],
-  "contact": {},
-  "license": "CC0-1.0",
+  "contact": {
+    "sources": "https://github.com/SirGrimcode/teleportcrystals",
+    "issues": "https://github.com/SirGrimcode/teleportcrystals/issues"
+  },
+  "license": "LGPL-3.0-only",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -23,5 +26,8 @@
     "minecraft": "26.3",
     "java": ">=25",
     "fabric-api": "*"
-  }
+  },
+  "contributors": [
+    "Claude (AI assistant by Anthropic)"
+  ]
 }

@@ -38,6 +38,21 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release = 25
 }
 
+// Ship the license texts and notice inside the jar (the LGPL asks that recipients get them).
+jar {
+    inputs.property "projectName", project.name
+
+    from("LICENSE") {
+        rename { "${it}_${inputs.properties.projectName}" }
+    }
+    from("COPYING") {
+        rename { "${it}_${inputs.properties.projectName}" }
+    }
+    from("NOTICE") {
+        rename { "${it}_${inputs.properties.projectName}" }
+    }
+}
+
 java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_25
